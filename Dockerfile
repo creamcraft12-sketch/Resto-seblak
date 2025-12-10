@@ -5,23 +5,30 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    git \
     zip \
     unzip \
-    git \
-    curl
+    curl \
+    nodejs \
+    npm
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql
 
-# Install composer
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
 COPY . .
 
+# Install PHP deps
 RUN composer install --no-dev --optimize-autoloader
+
+# Install JS deps & build Vite ✅
+RUN npm install
+RUN npm run build
 
 EXPOSE 8000
 
